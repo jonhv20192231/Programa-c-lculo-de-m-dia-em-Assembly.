@@ -1,0 +1,235 @@
+ .data
+ 
+    # Declaração das variáveis que irão pedir o valor
+    Nota01: .asciiz "Digite sua nota 01 de 0-7: "
+    Trabalho01: .asciiz "Digite seu trabalho 01 0-3: "
+
+    Nota02: .asciiz "Digite sua nota 02 de 0-7: "
+    Trabalho02: .asciiz "Digite seu trabalho 02 0-3: "
+
+    Nota03: .asciiz "Digite sua nota 03 de 0-7: "
+    Trabalho03: .asciiz "Digite seu trabalho 03 0-3: "
+    
+    # Parte de impressão dos valores
+    Resultado: .asciiz "\nA media final é: "
+
+    Aprovado: .asciiz "\nAluno APROVADO"
+    Recuperacao: .asciiz "\nAluno em RECUPERACAO"
+    Reprovado: .asciiz "\nAluno REPROVADO"
+    # Valores que serão guardado nos respectivos registradores
+    Divisao: .float 2.0  
+    MediaAprovado: .float 6.0
+    MediaRecuperacao: .float 4.0
+    Tres: .float 3.0
+    # É aqui onde irá aparece para o usuário se deseja continuar ou não
+    
+    Continuar: .asciiz "\n\nDeseja continuar?\nDigite 1 para continuar e 0 para sair: "
+    
+    # Após colocar todos os resultados, será aqui que irá mostrar as 3 notas
+    # + a média final acompanhado com a situação do aluno
+    MostrarNota1: .asciiz "\nNota01: "
+    MostrarNota2: .asciiz "\nNota02: "
+    MostrarNota3: .asciiz "\nNota03: "
+    
+    #local de criação das macros 
+    .macro Nota01
+     # Nota 1
+     li $v0, 4
+     la $a0, Nota01
+     syscall
+
+     li $v0, 6
+     syscall
+     mov.s $f1, $f0
+
+# Trabalho 1
+     li $v0, 4
+     la $a0, Trabalho01
+     syscall
+
+     li $v0, 6
+     syscall
+     mov.s $f2, $f0 
+    .end_macro
+    
+    .macro Nota02
+     # Nota 2
+     li $v0, 4
+     la $a0, Nota02
+     syscall
+
+     li $v0, 6
+     syscall
+     mov.s $f3, $f0
+
+# Trabalho 2
+     li $v0, 4
+     la $a0, Trabalho02
+     syscall
+
+     li $v0, 6
+     syscall
+     mov.s $f4, $f0
+    .end_macro
+    
+    .macro Nota03
+    # Nota 3
+    li $v0, 4
+    la $a0, Nota03
+    syscall
+
+    li $v0, 6
+    syscall
+    mov.s $f5, $f0
+
+    # Trabalho 3
+    li $v0, 4
+    la $a0, Trabalho03
+    syscall
+
+    li $v0, 6
+    syscall
+    mov.s $f6, $f0
+    .end_macro
+    
+    
+    .macro Calculos
+     add.s $f7, $f1, $f2
+
+     # Nota final 2 = nota + trabalho
+     add.s $f8, $f3, $f4
+
+     # Nota final 3 = nota + trabalho
+     add.s $f9, $f5, $f6
+
+     # Soma das 3 notas finais
+     add.s $f10, $f7, $f8
+     add.s $f10, $f10, $f9
+
+     # Carrega 3.0
+     l.s $f21, Tres
+
+     # Media final
+     div.s $f12, $f10, $f21
+     .end_macro
+     
+     .macro MostrarNotas
+      # Nota01
+      li $v0, 4
+      la $a0, MostrarNota1
+      syscall
+
+      li $v0, 2
+      mov.s $f12, $f7
+      syscall
+
+      # Nota02
+      li $v0, 4
+      la $a0, MostrarNota2
+      syscall
+
+      li $v0, 2
+      mov.s $f12, $f8
+      syscall
+
+      # Nota03
+      li $v0, 4
+      la $a0, MostrarNota3
+      syscall
+
+      li $v0, 2
+      mov.s $f12, $f9
+      syscall
+
+
+   # MOSTRAR MEDIA FINAL
+
+
+    li $v0, 4
+    la $a0, Resultado
+    syscall
+
+    li $v0, 2
+    mov.s $f12, $f12
+    syscall
+     .end_macro
+    
+ .text
+.globl main
+
+ main:
+
+ inicio:
+ 
+ 
+ # Leituras das 3 notas 
+ Nota01
+ Nota02
+ Nota03
+ # Aqui ocorrerá as operações aritmética, no caso A soma das 3 notas e divido por 3
+ Calculos
+
+ # Aqui onde irá Mostrar as notas01, 02, 03 e a média junto com a situação do aluno
+ MostrarNotas
+
+ # VERIFICACOES
+
+ # Carrega medias de comparacao
+ l.s $f13, MediaAprovado # -> Repare que lá em .data eu criei 
+ l.s $f14, MediaRecuperacao # variáveis para guardar valores 6 e 4
+
+ # Se media >= 6 -> aprovado
+ c.le.s $f13, $f12
+ bc1t aprovado
+
+ # Se media >= 4 -> recuperacao
+ c.le.s $f14, $f12
+ bc1t recuperacao
+
+ # Senao -> reprovado
+ j reprovado
+
+
+ # Criação de labels
+
+
+ aprovado:
+    li $v0, 4
+    la $a0, Aprovado
+    syscall
+    j fim
+
+ recuperacao:
+    li $v0, 4
+    la $a0, Recuperacao
+    syscall
+    j fim
+
+ reprovado:
+    li $v0, 4
+    la $a0, Reprovado
+    syscall
+    j fim
+
+  
+ fim:
+ # Foi utilizado o laço de repetição(j) para implementação de "Deseja continuar?"
+ # Quando o usuário seleciona 1, ele voltar lá para início e fazer as contas
+ # novamente.
+ 
+ 
+  li $v0, 4
+  la $a0, Continuar
+  syscall
+
+ # Leitura do inteiro
+  li $v0, 5
+  syscall
+
+ # Valor digitado fica em $v0
+  beq $v0, 1, inicio
+
+ # Se digitou 0 encerra
+  li $v0, 10
+  syscall
+    
