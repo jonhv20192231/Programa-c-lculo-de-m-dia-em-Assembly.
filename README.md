@@ -1,4 +1,4 @@
-<img width="224" height="224" alt="image" src="https://github.com/user-attachments/assets/0292f41d-6cb4-4106-b2f6-a6f33be70967" />Programa - Cálculo de média escolar em Assembly
+Programa - Cálculo de média escolar em Assembly
 Um programa calculando 3 notas para dar uma média, onde deve atender condições de aprovado, reprovado e recuperação.
 
 
